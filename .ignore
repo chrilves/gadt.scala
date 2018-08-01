@@ -1,0 +1,6 @@
+project/project/
+target/
+.git/
+.gitignore
+.js/
+.jvm/
