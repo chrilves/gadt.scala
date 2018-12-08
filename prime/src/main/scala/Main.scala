@@ -1,4 +1,4 @@
-package chrilves.gadt.prime;
+package chrilves.gadt.prime
 
 object Main {
   def renderMain(n: Int): Unit = {

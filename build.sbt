@@ -5,55 +5,22 @@ import sbtcrossproject.{crossProject, CrossType}
 lazy val warts =
   Warts.allBut(Wart.Recursion)
 
-val safeScalaOptions =
-  Seq(
-    "-deprecation",
-    "-encoding",
-    "UTF8",
-    "-explaintypes",
-    "-feature",
-    "-language:-dynamics",
-    "-language:postfixOps",
-    "-language:reflectiveCalls",
-    "-language:implicitConversions",
-    "-language:higherKinds",
-    "-language:existentials",
-    "-language:experimental.macros",
-    "-unchecked",
-    "-Xlint:_",
-    "-Yno-adapted-args",
-    "-Ypartial-unification",
-    "-Ywarn-adapted-args",
-    "-Ywarn-dead-code",
-    "-Ywarn-extra-implicit",
-    "-Ywarn-inaccessible",
-    "-Ywarn-infer-any",
-    "-Ywarn-macros:both",
-    "-Ywarn-nullary-override",
-    "-Ywarn-nullary-unit",
-    "-Ywarn-numeric-widen",
-    "-Ywarn-self-implicit",
-    "-Ywarn-unused:_",
-    "-Ywarn-unused-import",
-    "-Ywarn-value-discard"
-  )
-
 lazy val globalSettings: Seq[sbt.Def.SettingsDefinition] =
   Seq(
     inThisBuild(
       List(
-        organization := "com.example",
-        scalaVersion := "2.12.6",
+        organization := "com.github.chrilves",
+        scalaVersion := "2.12.7",
         version := "0.1.0-SNAPSHOT"
       )),
     updateOptions := updateOptions.value.withCachedResolution(true),
-    scalacOptions ++= safeScalaOptions,
     wartremoverErrors in (Compile, compile) := warts,
     wartremoverWarnings in (Compile, console) := warts,
-    addCompilerPlugin("io.tryp" % "splain" % "0.3.1" cross CrossVersion.patch),
+    addCompilerPlugin("io.tryp" % "splain" % "0.3.4" cross CrossVersion.patch),
+    addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.8" cross CrossVersion.binary),
     scalafmtOnCompile := true,
     libraryDependencies ++= Seq(
-      //"org.typelevel" %%% "cats-core" % "1.2.0",
+      "org.typelevel" %%% "cats-core" % "1.5.0",
       "org.scalatest" %%% "scalatest" % "3.0.5" % Test
     )
     //, scalaJSUseMainModuleInitializer := true
@@ -75,3 +42,18 @@ lazy val prime =
     .settings(globalSettings : _*)
     .settings(name := "prime")
     .dependsOn(coreJVM)
+
+lazy val web =
+  project
+    .in(file("web"))
+    .enablePlugins(ScalaJSPlugin)
+    .settings(globalSettings : _*)
+    .settings(
+      name := "prime-web",
+      libraryDependencies ++= Seq(
+        "chrilves" %%% "typed-web" % "0.1.0-SNAPSHOT",
+        "org.scala-js" %%% "scalajs-dom" % "0.9.5"
+      ),
+      scalaJSUseMainModuleInitializer := true
+    )
+    .dependsOn(coreJS)
