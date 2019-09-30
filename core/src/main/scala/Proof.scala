@@ -64,17 +64,19 @@ object Term {
           (t, log(l.print))
 
         case Node(t, l, c) =>
-          (t,
-           if (c.isEmpty)
-             log(l.print)
-           else
-             Pretty.block(
-               log(s"${l.print}(  /* ${t.print} */\n  ") +
-                 Pretty.block(
-                   c.map(print).sep(log(",\n"))
-                 ) +
-                 log("\n)")
-             ))
+          (
+            t,
+            if (c.isEmpty)
+              log(l.print)
+            else
+              Pretty.block(
+                log(s"${l.print}(  /* ${t.print} */\n  ") +
+                  Pretty.block(
+                    c.map(print).sep(log(",\n"))
+                  ) +
+                  log("\n)")
+              )
+          )
       }
 
     Pretty.block(

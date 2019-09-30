@@ -152,7 +152,8 @@ object Prime {
         |  * Again there exists a value of type Prime[N] if and only if N is prime.
         |  */
         |type Prime[N] = ForAll[_2, N]
-        |""".stripMargin)
+        |""".stripMargin
+    )
 
   def tNats(e: Int): Pretty = {
 
@@ -200,7 +201,8 @@ object Prime {
         |  n + 1 is then encoded as the type List[_n]
         |*/
         |type _0 = String
-        |""").stripMargin)
+        |""").stripMargin
+      )
 
     (1 to (e + 1)).foldLeft(r) {
       case (s, n) =>
@@ -226,16 +228,15 @@ object Prime {
     def ltrec(n1: Int, n2: Int): F[Term] =
       for {
         hr <- lessThan(n1, n2)
-      } yield
-        nodet(
-          tpe(n1, n2 + 1),
-          tnode(
-            "LessThan.LTRec",
-            tNat(n1),
-            tNat(n2)
-          ),
-          hr
-        )
+      } yield nodet(
+        tpe(n1, n2 + 1),
+        tnode(
+          "LessThan.LTRec",
+          tNat(n1),
+          tNat(n2)
+        ),
+        hr
+      )
 
     if (i >= j)
       F.raiseError(())
@@ -255,10 +256,11 @@ object Prime {
     def addPlus1(n1: Int, n2: Int): F[Term] =
       for {
         hr <- add(n1, n2)
-      } yield
-        nodet(tpe(n1, n2 + 1),
-              tnode("Add.AddPlus1", tNat(n1), tNat(n2), tNat(n1 + n2)),
-              hr)
+      } yield nodet(
+        tpe(n1, n2 + 1),
+        tnode("Add.AddPlus1", tNat(n1), tNat(n2), tNat(n1 + n2)),
+        hr
+      )
 
     if (j < 0 || i < 0)
       F.raiseError(())
@@ -289,21 +291,23 @@ object Prime {
       for {
         nz <- notZero(n2)
         lt <- lessThan(n2, n1)
-      } yield
-        nodet(tpe(n1, n2),
-              tnode("NotDiv.NotDivBasic", tNat(n1), tNat(n2)),
-              nz,
-              lt)
+      } yield nodet(
+        tpe(n1, n2),
+        tnode("NotDiv.NotDivBasic", tNat(n1), tNat(n2)),
+        nz,
+        lt
+      )
 
     def notDivRec(n1: Int, n2: Int): F[Term] =
       for {
         hr <- notDiv(n1, n2)
         tl <- add(n1, n2)
-      } yield
-        nodet(tpe(n1, n1 + n2),
-              tnode("NotDiv.NotDivRec", tNat(n1), tNat(n2), tNat(n1 + n2)),
-              hr,
-              tl)
+      } yield nodet(
+        tpe(n1, n1 + n2),
+        tnode("NotDiv.NotDivRec", tNat(n1), tNat(n2), tNat(n1 + n2)),
+        hr,
+        tl
+      )
 
     if (n1 < 0 || n2 < 0)
       F.raiseError(())
@@ -324,11 +328,12 @@ object Prime {
       for {
         hr <- notDiv(n1, n2)
         tl <- forAll(n1 + 1, n2)
-      } yield
-        nodet(tpe(n1, n2),
-              tnode("ForAll.ForAllCons", tNat(n1), tNat(n2)),
-              hr,
-              tl)
+      } yield nodet(
+        tpe(n1, n2),
+        tnode("ForAll.ForAllCons", tNat(n1), tNat(n2)),
+        hr,
+        tl
+      )
 
     if (n1 > n2)
       F.raiseError(())
@@ -357,11 +362,13 @@ object Prime {
                 p.print
               case None =>
                 Pretty.log(
-                  "??? // Try to build a value that pass the type checker using only the constructors.")
+                  "??? // Try to build a value that pass the type checker using only the constructors."
+                )
             }
           ) +
           Pretty.log(
-            s"""\n\ndef main(args: Array[String]): Unit =\n  println(s"$$prime$n")""")
+            s"""\n\ndef main(args: Array[String]): Unit =\n  println(s"$$prime$n")"""
+          )
       ) +
       Pretty.log("\n}")
 }

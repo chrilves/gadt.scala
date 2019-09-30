@@ -45,12 +45,12 @@ object PrimeWeb extends WebApp {
     div()(
       h1()(
         a(
-          href(
-            "https://en.wikipedia.org/wiki/Generalized_algebraic_data_type"))(
-          text("Generalized Algebraic Data Types (GADT)")),
+          href("https://en.wikipedia.org/wiki/Generalized_algebraic_data_type")
+        )(text("Generalized Algebraic Data Types (GADT)")),
         text(" example: "),
         a(href("https://en.wikipedia.org/wiki/Prime_number"))(
-          text("Prime Numbers."))
+          text("Prime Numbers.")
+        )
       ),
       p()(
         text("""This is a demonstration of the expressive power of GADTs.
@@ -73,5 +73,5 @@ object PrimeWeb extends WebApp {
     )
 
   def main(args: Array[String]): Unit =
-    runMain("prime-web")
+    runMain("prime-web", WebApp.UseDifference)
 }
