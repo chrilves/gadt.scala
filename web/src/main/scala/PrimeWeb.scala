@@ -44,27 +44,7 @@ object PrimeWeb extends WebApp {
     }
   @SuppressWarnings(Array("org.wartremover.warts.Nothing"))
   def view(model: Model): Html[Option[Msg]] =
-    div()(
-      h1()(
-        a(
-          href("https://en.wikipedia.org/wiki/Generalized_algebraic_data_type")
-        )(text("Generalized Algebraic Data Types (GADT)")),
-        text(" example: "),
-        a(href("https://en.wikipedia.org/wiki/Prime_number"))(
-          text("Prime Numbers.")
-        )
-      ),
-      p()(
-        text("""This is a demonstration of the expressive power of GADTs.
-            |Please enter a positive integer, prime or not, then download
-            |the file (the button only appears when there is a positive
-            |integer in the input box). The file contains a valid Scala
-            |program (run it to be sure there is no trick). Then follow
-            |the intructions in the file. You can try as many numbers as
-            |you like.
-          """.stripMargin)
-      ),
-      p()(text("Enter a positive integer")),
+    span()(
       input(value(model), oninput(x => Some(Msg.NewInput(x))))(),
       toInt(model) match {
         case Some(n) if n >= 1 =>
