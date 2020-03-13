@@ -22,6 +22,8 @@ object PrimeWeb extends WebApp {
     try (Some(s.toInt))
     catch { case _: NumberFormatException => None }
 
+  def documentReactions(model: Model): List[Reaction[Option[Msg]]] = Nil
+
   def update(message: Msg, model: Model): Model =
     message match {
       case Msg.NewInput(str) => str
@@ -41,7 +43,7 @@ object PrimeWeb extends WebApp {
         model
     }
   @SuppressWarnings(Array("org.wartremover.warts.Nothing"))
-  def view(model: Model): Html[Msg] =
+  def view(model: Model): Html[Option[Msg]] =
     div()(
       h1()(
         a(
@@ -63,10 +65,10 @@ object PrimeWeb extends WebApp {
           """.stripMargin)
       ),
       p()(text("Enter a positive integer")),
-      input(value(model), oninput(Msg.NewInput(_)))(),
+      input(value(model), oninput(x => Some(Msg.NewInput(x))))(),
       toInt(model) match {
         case Some(n) if n >= 1 =>
-          button(onclick(Msg.Download))(text(s"Download 'Prime$n.scala'"))
+          button(onclick(Some(Msg.Download)))(text(s"Download 'Prime$n.scala'"))
         case _ =>
           text("")
       }

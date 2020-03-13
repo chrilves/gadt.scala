@@ -37,17 +37,13 @@ object Pretty {
       def apply(pos: Position): State = f(pos)
     }
 
-  val empty: Pretty = Pretty { (pos: Position) =>
-    State(pos, "")
-  }
+  val empty: Pretty = Pretty { (pos: Position) => State(pos, "") }
 
   val newLine: Pretty = Pretty { (pos: Position) =>
     State(pos.copy(current = pos.offset), s"\n${" " * pos.offset}")
   }
 
-  @inline def offset: Pretty = Pretty { (pos: Position) =>
-    State(pos.save, "")
-  }
+  @inline def offset: Pretty = Pretty { (pos: Position) => State(pos.save, "") }
 
   @inline def local(p: Pretty): Pretty =
     p.local
