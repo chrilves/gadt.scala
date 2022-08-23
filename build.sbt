@@ -9,18 +9,16 @@ lazy val globalSettings: Seq[sbt.Def.SettingsDefinition] =
     inThisBuild(
       List(
         organization := "com.github.chrilves",
-        scalaVersion := "2.13.1",
+        scalaVersion := "3.1.3",
         version := "0.1.0-SNAPSHOT"
       )),
     updateOptions := updateOptions.value.withCachedResolution(true),
-    wartremoverErrors in (Compile, compile) := warts,
-    wartremoverWarnings in (Compile, console) := warts,
-    addCompilerPlugin("io.tryp" % "splain" % "0.5.1" cross CrossVersion.patch),
-    addCompilerPlugin("org.typelevel" % "kind-projector" % "0.10.3" cross CrossVersion.binary),
+    Compile/compile/wartremoverErrors := warts,
+    Compile/console/wartremoverErrors := warts,
     scalafmtOnCompile := true,
     libraryDependencies ++= Seq(
-      "org.typelevel" %%% "cats-core" % "2.1.1",
-      "org.scalatest" %%% "scalatest" % "3.1.1" % Test
+      "org.typelevel" %%% "cats-core" % "2.8.0",
+      "org.scalatest" %%% "scalatest" % "3.2.13" % Test
     )
     //, scalaJSUseMainModuleInitializer := true
   )
@@ -31,6 +29,7 @@ lazy val core =
     .in(file("core"))
     .settings(globalSettings : _*)
     .settings(name := "core")
+    .jsSettings(scalacOptions += "-scalajs")
 
 lazy val coreJS = core.js
 lazy val coreJVM = core.jvm
@@ -49,9 +48,10 @@ lazy val web =
     .settings(globalSettings : _*)
     .settings(
       name := "prime-web",
+      scalacOptions += "-scalajs",
       libraryDependencies ++= Seq(
         "chrilves" %%% "typed-web" % "0.1.0-SNAPSHOT",
-        "org.scala-js" %%% "scalajs-dom" % "1.0.0"
+        "org.scala-js" %%% "scalajs-dom" % "2.2.0"
       ),
       scalaJSUseMainModuleInitializer := true
     )

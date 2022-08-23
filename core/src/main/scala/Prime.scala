@@ -2,11 +2,12 @@ package chrilves.gadt.prime
 
 object Prime {
 
-  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
-  implicit final class EqOps[A](val self: A) {
-    @inline def ===(o: A): Boolean =
+  extension [A](self: A)
+    @SuppressWarnings(
+      Array("org.wartremover.warts.Equals")
+    )
+    inline def ===(o: A): Boolean =
       self == o
-  }
 
   import Pretty._
   import cats._
@@ -158,8 +159,8 @@ object Prime {
   def tNats(e: Int): Pretty = {
 
     def list(n: Int): String =
-      (1 to n).foldLeft("String") {
-        case (s, _) => s"List[$s]"
+      (1 to n).foldLeft("String") { case (s, _) =>
+        s"List[$s]"
       }
 
     val r: Pretty =
@@ -204,9 +205,8 @@ object Prime {
         |""").stripMargin
       )
 
-    (1 to (e + 1)).foldLeft(r) {
-      case (s, n) =>
-        s + Pretty.log(s"type _$n = List[_${n - 1}] // ${list(n)}\n")
+    (1 to (e + 1)).foldLeft(r) { case (s, n) =>
+      s + Pretty.log(s"type _$n = List[_${n - 1}] // ${list(n)}\n")
     }
   }
 
@@ -218,7 +218,7 @@ object Prime {
 
   type MonadProof[F[_]] = MonadError[F, Unit]
 
-  def lessThan[F[_]](i: Int, j: Int)(implicit F: MonadProof[F]): F[Term] = {
+  def lessThan[F[_]](i: Int, j: Int)(using F: MonadProof[F]): F[Term] = {
     def tpe(i: Int, j: Int): Type =
       tnode("LessThan", tNat(i), tNat(j))
 
@@ -246,7 +246,7 @@ object Prime {
       ltrec(i, j - 1)
   }
 
-  def add[F[_]](i: Int, j: Int)(implicit F: MonadProof[F]): F[Term] = {
+  def add[F[_]](i: Int, j: Int)(using F: MonadProof[F]): F[Term] = {
     def tpe(i: Int, j: Int): Type =
       tnode("Add", tNat(i), tNat(j), tNat(i + j))
 
@@ -270,7 +270,7 @@ object Prime {
       addPlus1(i, j - 1)
   }
 
-  def notZero[F[_]](i: Int)(implicit F: MonadProof[F]): F[Term] = {
+  def notZero[F[_]](i: Int)(using F: MonadProof[F]): F[Term] = {
     def tpe(i: Int): Type =
       tnode("NotZero", tNat(i))
 
@@ -283,7 +283,7 @@ object Prime {
       listIsPositive(i - 1)
   }
 
-  def notDiv[F[_]](n1: Int, n2: Int)(implicit F: MonadProof[F]): F[Term] = {
+  def notDiv[F[_]](n1: Int, n2: Int)(using F: MonadProof[F]): F[Term] = {
     def tpe(i: Int, j: Int): Type =
       tnode("NotDiv", tNat(i), tNat(j))
 
@@ -317,7 +317,7 @@ object Prime {
       notDivRec(n1, n2 - n1)
   }
 
-  def forAll[F[_]](n1: Int, n2: Int)(implicit F: MonadProof[F]): F[Term] = {
+  def forAll[F[_]](n1: Int, n2: Int)(using F: MonadProof[F]): F[Term] = {
     def tpe(i: Int, j: Int): Type =
       tnode("ForAll", tNat(i), tNat(j))
 

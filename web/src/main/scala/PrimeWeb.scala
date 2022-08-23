@@ -8,24 +8,23 @@ import typed.web.syntax.html._
 
 import scala.scalajs.js
 
-object PrimeWeb extends WebApp {
+object PrimeWeb extends WebApp:
   type Model = String
   val initialModel: Model = ""
 
-  sealed abstract class Msg
-  object Msg {
-    final case class NewInput(str: String) extends Msg
-    final case object Download extends Msg
-  }
+  enum Msg:
+    case NewInput(str: String)
+    case Download
 
-  @inline def toInt(s: String): Option[Int] =
+  inline def toInt(s: String): Option[Int] =
     try (Some(s.toInt))
     catch { case _: NumberFormatException => None }
 
   def documentReactions(model: Model): List[Reaction[Option[Msg]]] = Nil
 
+  @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
   def update(message: Msg, model: Model): Model =
-    message match {
+    message match
       case Msg.NewInput(str) => str
       case Msg.Download =>
         toInt(model) match {
@@ -33,7 +32,10 @@ object PrimeWeb extends WebApp {
             val file: String =
               Prime.file(n).run
             val blob: Blob =
-              new Blob(js.Array(file), BlobPropertyBag("text/plain"))
+              new Blob(
+                js.Array(file),
+                js.Dynamic.literal(`type` = "text/plain").asInstanceOf[BlobPropertyBag]
+              )
             WebApp.download(blob, s"Prime$n.scala")
 
           case _ =>
@@ -41,7 +43,7 @@ object PrimeWeb extends WebApp {
         }
 
         model
-    }
+
   @SuppressWarnings(Array("org.wartremover.warts.Nothing"))
   def view(model: Model): Html[Option[Msg]] =
     span()(
@@ -56,4 +58,3 @@ object PrimeWeb extends WebApp {
 
   def main(args: Array[String]): Unit =
     runMain("prime-web", WebApp.UseDifference)
-}

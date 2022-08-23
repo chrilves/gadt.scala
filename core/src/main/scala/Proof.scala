@@ -4,7 +4,7 @@ sealed abstract class Type {
   @inline final def print: String = Type.print(this)
 }
 object Type {
-  final case class Leaf(text: String) extends Type
+  final case class Leaf(text: String)                        extends Type
   final case class Node(label: String, children: List[Type]) extends Type
 
   @inline def tleaf(t: String): Type =
@@ -33,9 +33,8 @@ sealed abstract class Term {
   @inline def print: Pretty = Term.print(this)
 }
 object Term {
-  final case class Leaf(tpe: Type, term: Type) extends Term
-  final case class Node(tpe: Type, ctor: Type, children: List[Term])
-      extends Term
+  final case class Leaf(tpe: Type, term: Type)                       extends Term
+  final case class Node(tpe: Type, ctor: Type, children: List[Term]) extends Term
 
   @inline def leaf(tpe: Type, t: String, c: Type*): Term =
     Leaf(tpe, Type.tnode(t, c: _*))
