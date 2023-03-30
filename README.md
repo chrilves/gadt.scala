@@ -68,49 +68,47 @@ Open the file `PrimeN.scala` to see the value `primeN` of type `Prime[_N]`.
 ## Natural numbers
 
 ```scala
-type S[N] = List[N]
+type Nat = _0 | S[?]
+final abstract class _0
+final abstract class S[N <: Nat]
 
-// We take the type String as Zero (it could be anything apart from List)
-type _0 = String
-type _1 = S[_0] // List[String]
-type _2 = S[_1] // List[List[String]]
-type _3 = S[_2] // List[List[List[String]]]
-type _4 = S[_3]
-type _5 = S[_4]
-type _6 = S[_5]
-type _7 = S[_6]
-type _8 = S[_7]
-type _9 = S[_8]
-type _10 = S[_9]
-type _11 = S[_10]
-type _12 = S[_11]
+
+type _1 = S[_0] // S[_0]
+type _2 = S[_1] // S[S[_0]]
+type _3 = S[_2] // S[S[S[_0]]]
 ```
 
 ## `N1 < N2`
 
 ```scala
-sealed abstract class LT[N1, N2]
-object LT {
+enum LessThan[N1 <: Nat, N2 <: Nat]:
   /** N < (N+1) */
-  final case class Z[N]() extends LT[N, S[N]]
+  case LTBase[N <: Nat]() extends LessThan[N, S[N]]
 
   /** N1 < N2 => N1 < (N2+1) */
-  final case class L[N1, N2](hr: LT[N1, N2]) extends LT[N1, S[N2]]
-}
+  case LTRec[N1 <: Nat, N2 <: Nat](hypothesis: LessThan[N1, N2]) extends LessThan[N1, S[N2]]
 ```
 
 ## `N1 + N2 = N3`
 
 ```scala
-sealed abstract class Add[N1, N2, N3]
-object Add {
+enum Add[N1 <: Nat, N2 <: Nat, N3 <: Nat]:
   /** N + 0 = N */
-  final case class Z[N]() extends Add[N, _0, N]
+  case AddZero[N <: Nat]() extends Add[N, _0, N]
 
   /** N1 + N2 = N3 => N1 + (N2+1) = (N3+1) */
-  final case class L[N1, N2, N3](hr: Add[N1, N2, N3])
+  case AddPlus1[N1 <: Nat, N2 <: Nat, N3 <: Nat](hypothesis: Add[N1, N2, N3])
       extends Add[N1, S[N2], S[N3]]
-}
+```
+
+## `N ≠ 0`
+
+`N1` is not `0`
+
+```scala
+enum NotZero[N <: Nat]:
+  /** N ≠ 0 */
+  case SIsPositive[N <: Nat]() extends NotZero[S[N]]
 ```
 
 ## `N1 ∤ N2`
@@ -118,15 +116,14 @@ object Add {
 `N1` does not divide `N2`
 
 ```scala
-sealed abstract class NotDiv[N1, N2]
-object NotDiv {
+enum NotDiv[N1 <: Nat, N2 <: Nat]:
   /** (N2+1) < N1 => N1 ∤ (N2+1) */
-  final case class TooBig[N1, N2](lt: LT[S[N2], N1]) extends NotDiv[N1, S[N2]]
+  case NotDivBase[N1 <: Nat, N2 <: Nat](notZero: NotZero[N2], lessThan: LessThan[N2, N1])
+    extends NotDiv[N1, N2]
 
   /* N1 ∤ N2 => N1 ∤ (N1+N2) */
-  final case class Sub[N1, N2, N3](hr: NotDiv[N1, N2], add: Add[N1, N2, N3])
-      extends NotDiv[N1, N3]
-}
+  case NotDivRec[N1 <: Nat, N2 <: Nat, N3 <: Nat](hypothesis: NotDiv[N1, N2], add: Add[N1, N2, N3])
+    extends NotDiv[N1, N3]
 ```
 
 ## `∀N, N1 ≤ N < N2 ⇒ N ∤ N2`
@@ -134,13 +131,19 @@ object NotDiv {
 ```scala
 sealed abstract class ForAll[N1, N2]
 object ForAll {
-  /** N2 < (N1+1) ⇒ ForAll<N1, N2> */
   final case class Empty[N1, N2](lt: LT[N2, S[N1]]) extends ForAll[N1, N2]
 
-  /** N1 ∤ N2 && ForAll<(N1+1), N2> => ForAll<N1, N2> */
   final case class Cons[N1, N2](head: NotDiv[N1, N2], tail: ForAll[S[N1], N2])
       extends ForAll[N1, N2]
 }
+
+enum ForAll[N1 <: Nat, N2 <: Nat]:
+  /** N2 < (N1+1) ⇒ ForAll<N1, N2> */
+  case ForAllBase[N <: Nat]() extends ForAll[N, N]
+
+  /** N1 ∤ N2 && ForAll<(N1+1), N2> => ForAll<N1, N2> */
+  case ForAllRec[N1 <: Nat, N2 <: Nat](head: NotDiv[N1, N2], tail: ForAll[S[N1], N2])
+    extends ForAll[N1, N2]
 ```
 
 ## `N` is prime
