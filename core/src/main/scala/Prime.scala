@@ -22,82 +22,75 @@ object Prime {
         |  * N1 < N2 means:
         |  * - there exists some strictly positive k such that N2 = N1 + k
         |  * - so that N2 = N1 + 1 + ... + 1 with k times "+ 1"
-        |  * - thus in our encoding: N2 = List[...List[N1]] with k times List[..]
+        |  * - thus in our encoding: N2 = S[...S[N1]] with k times S[..]
         |  *
         |  * There exists a value of type LessThan[N1, N2] if and only if N1 < N2.
         |  *
         |  * For example, there exists a value of type LessThan[_0,_1]:
-        |  *   val v1: LessThan[String, List[String]] = LessThan.IsSucc[String]()
+        |  *   val v1: LessThan[_0, S[_0]] = LessThan.LTTrivial[_0]()
         |  * but there is no value of type LessThan[_1,_0].
         |  */
-        |sealed abstract class LessThan[N1, N2]
-        |object LessThan {
-        |  /** LTTrivial[N] encodes the property that N < (N+1)
-        |    * which is in our encoding LessThan[N, List[N]]
+        |enum LessThan[N1 <: Nat, N2 <: Nat]:
+        |  /** LTBase[N] encodes the property that N < (N+1)
+        |    * which is in our encoding LessThan[N, S[N]]
         |    */
-        |  final case class LTTrivial[N]() extends LessThan[N, List[N]]
+        |  case LTBase[N <: Nat]() extends LessThan[N, S[N]]
         |
         |  /** Remember we want, for any types N1 and N2, that:
         |    * there exists a value of type LessThan[N1, N2] if and only if N1 < N2.
         |    *
         |    * If N1 < N2, then N1 < (N2+1). So if there exists a value of type
         |    * LessThan[N1, N2], then we need to make sure there exists also a
-        |    * value of type LessThan[N1, List[N2]]. Next ensures this.
+        |    * value of type LessThan[N1, S[N2]]. Next ensures this.
         |    */
-        |  final case class LTRec[N1, N2](hypothesis: LessThan[N1, N2]) extends LessThan[N1, List[N2]]
-        |}
+        |  case LTRec[N1 <: Nat, N2 <: Nat](hypothesis: LessThan[N1, N2]) extends LessThan[N1, S[N2]]
         |
         |/** The type Add[N1, N2, N3] encodes the property that N1 + N2 = N3
         |  *
         |  * Again, there exists a value of type Add[N1, N2, N3] if and only if N1 + N2 = N3.
         |  */
-        |sealed abstract class Add[N1, N2, N3]
-        |object Add {
+        |enum Add[N1 <: Nat, N2 <: Nat, N3 <: Nat]:
         |  /** For any N, we have N + 0 = N
-        |    * So for any N there must exist a value of type Add[N, String, N]
+        |    * So for any N there must exist a value of type Add[N, _0, N]
         |    *
-        |    * Remember that our encoding of the number 0 is the type String
+        |    * Remember that our encoding of the number 0 is the type _0
         |    */
-        |  final case class AddZero[N]() extends Add[N, String, N]
+        |  case AddZero[N <: Nat]() extends Add[N, _0, N]
         |
         |  /** For any natural number N1, N2 and N3,
         |    *   if N1 + N2 = N3 then N1 + (N2+1) = (N3+1)
         |    *
         |    * Then in our encoding it means that for any type N1, N2 and N3,
         |    *   if there exists a value of type Add[N1, N2, N3]
-        |    *   then there exists a value of type Add[N1, List[N2], List[N3]]
+        |    *   then there exists a value of type Add[N1, S[N2], S[N3]]
         |    *
         |    * AddPlus1 ensures exactly that.
         |    */
-        |  final case class AddPlus1[N1, N2, N3](hypothesis: Add[N1, N2, N3])
-        |      extends Add[N1, List[N2], List[N3]]
-        |}
+        |  case AddPlus1[N1 <: Nat, N2 <: Nat, N3 <: Nat](hypothesis: Add[N1, N2, N3])
+        |      extends Add[N1, S[N2], S[N3]]
         |
         |/** The type NotZero[N] encodes the property that N ≠ 0
         |  *
         |  * Again, there exists a value of type NotZero[N] if and only if N ≠ 0
         |  */
-        |sealed abstract class NotZero[N]
-        |object NotZero {
+        |enum NotZero[N <: Nat]:
         |  /* The only possible way to have a value of type NotZero[N]
-        |    * is through ListIsPositive[X]() for some type X which is
-        |    * of type NotZero[List[X]] so List[X] = N.
+        |    * is through SIsPositive[X]() for some type X which is
+        |    * of type NotZero[S[X]] so S[X] = N.
         |    *
-        |    * Thus any List[X] will do but not String, which is
+        |    * Thus any S[X] will do but not _0, which is
         |    * precisely the desired property.
         |    */
-        |  final case class ListIsPositive[N]() extends NotZero[List[N]]
-        |}
-        |
+        |  case SIsPositive[N <: Nat]() extends NotZero[S[N]]
+        |  
         |/** The type NotDiv[N1, N2] encodes the property that N1 does not divide N2,
         |  * which is written: N1 ∤ N2.
         |  *
         |  * Again, there exists a value of type NotDiv[N1, N2] if and only if N1 ∤ N2.
         |  */
-        |sealed abstract class NotDiv[N1, N2]
-        |object NotDiv {
+        |enum NotDiv[N1 <: Nat, N2 <: Nat]:
         |  /** If 0 < N2 < N1 then N1 can not divide N2 */
-        |  final case class NotDivBasic[N1, N2](notZero: NotZero[N2], lessThan: LessThan[N2, N1])
+        |  case NotDivBase[N1 <: Nat, N2 <: Nat](notZero: NotZero[N2], lessThan: LessThan[N2, N1])
         |    extends NotDiv[N1, N2]
         |
         |  /* If N1 do not divide N2, then N1 does not divide N2 + N1.
@@ -108,10 +101,10 @@ object Prime {
         |      Thus N1 + N2 = N1 + (q*N1 + r) = (q+1)*N1 + r
         |      So N1 does not divide N1 + N2 either.
         |  */
-        |  final case class NotDivRec[N1, N2, N3](hypothesis: NotDiv[N1, N2], add: Add[N1, N2, N3])
-        |      extends NotDiv[N1, N3]
-        |}
+        |  case NotDivRec[N1 <: Nat, N2 <: Nat, N3 <: Nat](hypothesis: NotDiv[N1, N2], add: Add[N1, N2, N3])
+        |    extends NotDiv[N1, N3]
         |
+        |  
         |/** The type ForAll[N1, N2] means:
         |  *   - N1 ≤ N2
         |  *   - and for all N, if N1 ≤ N < N2, then N do not divide N2
@@ -120,14 +113,13 @@ object Prime {
         |  *   - N1 ≤ N2
         |  *   - and for all N, if N1 ≤ N < N2, then N do not divide N2
         |  */
-        |sealed abstract class ForAll[N1, N2]
-        |object ForAll {
+        |enum ForAll[N1 <: Nat, N2 <: Nat]:
         |  /** We trivialy have
         |    *   - N ≤ N
         |    *   - and for all M, if N ≤ M < N, then M do not divide N
         |    * because there is no M such that N ≤ M and M < N.
         |    */
-        |  final case class ForAllNil[N]() extends ForAll[N, N]
+        |  case ForAllBase[N <: Nat]() extends ForAll[N, N]
         |
         |  /** If N1 do not divide N2
         |    * and N1 + 1 ≤ N2
@@ -140,27 +132,32 @@ object Prime {
         |    * If we have a value of type NotDiv[N1, N2] ensuring N1 do not divide N2
         |    * and a value of type ForAll[List[N1], N2] ensuring both that N1 + 1 ≤ N2
         |    * and for all N, if N1+1 ≤ N < N2, then N do not divide N2
-        |    * then we need to have a value of type ForAll[N1, N2].
+        |    * then we have a value of type ForAll[N1, N2].
         |    *
-        |    * ForAllCons ensures this.
+        |    * ForAllRec ensures this.
         |    */
-        |  final case class ForAllCons[N1, N2](head: NotDiv[N1, N2], tail: ForAll[List[N1], N2])
-        |      extends ForAll[N1, N2]
-        |}
-        |
+        |  case ForAllRec[N1 <: Nat, N2 <: Nat](head: NotDiv[N1, N2], tail: ForAll[S[N1], N2])
+        |    extends ForAll[N1, N2]
+        |  
         |/** The type Prime[N] encodes the property that N is prime.
         |  *
         |  * Again there exists a value of type Prime[N] if and only if N is prime.
         |  */
-        |type Prime[N] = ForAll[_2, N]
+        |type Prime[N <: Nat] = ForAll[_2, N]
+        |
+        |import LessThan.*
+        |import Add.*
+        |import NotZero.*
+        |import NotDiv.*
+        |import ForAll.*
         |""".stripMargin
     )
 
   def tNats(e: Int): Pretty = {
 
-    def list(n: Int): String =
-      (1 to n).foldLeft("String") { case (s, _) =>
-        s"List[$s]"
+    def typeN(n: Int): String =
+      (1 to n).foldLeft("_0") { case (s, _) =>
+        s"S[$s]"
       }
 
     val r: Pretty =
@@ -193,20 +190,40 @@ object Prime {
         |/*
         |  The property we want to prove is that $e is a prime number.
         |  Firstly, we need to find some way to encode natural number
-        |  (non-negative integers) as types. To each natural number n,
-        |  we associate the type;
+        |  (non-negative integers) as types.
         |
-        |  type _n = List[...List[String]] with n occurences of 'List'
+        |  Note that, for every natural number n:
         |
-        |  0     is then encoded as the type String
-        |  n + 1 is then encoded as the type List[_n]
+        |  n == 0 + 1 + ... + 1 with "+ 1" repeated n times.
+        |
+        |  1 == 0 + 1, 2 == 0 + 1 + 1, 3 = 0 + 1 + 1 + 1, etc
+        |        |  
+        |  We can use this to assiciate to every natural number n a type _n:
+        |    
+        |  0     will be assiciated with a type _0 (any type would fit).
+        |  n + 1 will be associated with a type S[_n] meaning "successor of n"
+        |
+        |  It gives for _n:
+        |
+        |  type _n = S[...S[_0]] with "S[" repeated n times.
+        |
+        |  Note that _n is just an alias, the real concrete type is S[...S[_0]].
+        |
+        |  A natural number is thus:
+        |   - either 0
+        |   - or the successor of another natural nubmer (i.e. n - 1)
         |*/
-        |type _0 = String
+        |
+        |type Nat = _0 | S[?]
+        |final abstract class _0
+        |final abstract class S[N <: Nat]
+        |
+        |
         |""").stripMargin
       )
 
     (1 to (e + 1)).foldLeft(r) { case (s, n) =>
-      s + Pretty.log(s"type _$n = List[_${n - 1}] // ${list(n)}\n")
+      s + Pretty.log(s"type _$n = S[_${n - 1}] // ${typeN(n)}\n")
     }
   }
 
@@ -222,16 +239,16 @@ object Prime {
     def tpe(i: Int, j: Int): Type =
       tnode("LessThan", tNat(i), tNat(j))
 
-    def lttrivial(n: Int): F[Term] =
-      F.pure(leaf(tpe(n, n + 1), "LessThan.LTTrivial", tNat(n)))
+    def ltBase(n: Int): F[Term] =
+      F.pure(leaf(tpe(n, n + 1), "LTBase", tNat(n)))
 
-    def ltrec(n1: Int, n2: Int): F[Term] =
+    def ltRec(n1: Int, n2: Int): F[Term] =
       for {
         hr <- lessThan(n1, n2)
       } yield nodet(
         tpe(n1, n2 + 1),
         tnode(
-          "LessThan.LTRec",
+          "LTRec",
           tNat(n1),
           tNat(n2)
         ),
@@ -241,9 +258,9 @@ object Prime {
     if (i >= j)
       F.raiseError(())
     else if (j === i + 1)
-      lttrivial(i)
+      ltBase(i)
     else
-      ltrec(i, j - 1)
+      ltRec(i, j - 1)
   }
 
   def add[F[_]](i: Int, j: Int)(using F: MonadProof[F]): F[Term] = {
@@ -251,14 +268,14 @@ object Prime {
       tnode("Add", tNat(i), tNat(j), tNat(i + j))
 
     def addZero(i: Int): F[Term] =
-      F.pure(leaf(tpe(i, 0), "Add.AddZero", tNat(i)))
+      F.pure(leaf(tpe(i, 0), "AddZero", tNat(i)))
 
     def addPlus1(n1: Int, n2: Int): F[Term] =
       for {
         hr <- add(n1, n2)
       } yield nodet(
         tpe(n1, n2 + 1),
-        tnode("Add.AddPlus1", tNat(n1), tNat(n2), tNat(n1 + n2)),
+        tnode("AddPlus1", tNat(n1), tNat(n2), tNat(n1 + n2)),
         hr
       )
 
@@ -274,13 +291,13 @@ object Prime {
     def tpe(i: Int): Type =
       tnode("NotZero", tNat(i))
 
-    def listIsPositive(i: Int): F[Term] =
-      F.pure(leaf(tpe(i + 1), "NotZero.ListIsPositive", tNat(i)))
+    def sIsPositive(i: Int): F[Term] =
+      F.pure(leaf(tpe(i + 1), "SIsPositive", tNat(i)))
 
     if (i <= 0)
       F.raiseError(())
     else
-      listIsPositive(i - 1)
+      sIsPositive(i - 1)
   }
 
   def notDiv[F[_]](n1: Int, n2: Int)(using F: MonadProof[F]): F[Term] = {
@@ -293,7 +310,7 @@ object Prime {
         lt <- lessThan(n2, n1)
       } yield nodet(
         tpe(n1, n2),
-        tnode("NotDiv.NotDivBasic", tNat(n1), tNat(n2)),
+        tnode("NotDivBase", tNat(n1), tNat(n2)),
         nz,
         lt
       )
@@ -304,7 +321,7 @@ object Prime {
         tl <- add(n1, n2)
       } yield nodet(
         tpe(n1, n1 + n2),
-        tnode("NotDiv.NotDivRec", tNat(n1), tNat(n2), tNat(n1 + n2)),
+        tnode("NotDivRec", tNat(n1), tNat(n2), tNat(n1 + n2)),
         hr,
         tl
       )
@@ -322,7 +339,7 @@ object Prime {
       tnode("ForAll", tNat(i), tNat(j))
 
     def forAllNil(n: Int): F[Term] =
-      F.pure(nodet(tpe(n, n), tnode("ForAll.ForAllNil", tNat(n))))
+      F.pure(nodet(tpe(n, n), tnode("ForAllBase", tNat(n))))
 
     def forAllCons(n1: Int, n2: Int): F[Term] =
       for {
@@ -330,7 +347,7 @@ object Prime {
         tl <- forAll(n1 + 1, n2)
       } yield nodet(
         tpe(n1, n2),
-        tnode("ForAll.ForAllCons", tNat(n1), tNat(n2)),
+        tnode("ForAllRec", tNat(n1), tNat(n2)),
         hr,
         tl
       )
@@ -349,26 +366,22 @@ object Prime {
   import cats.instances.option._
 
   def file(n: Int): Pretty =
-    log(s"object Prime$n {\n  ") +
+    tNats(n) +
+      log("\n\n") +
+      types +
+      log("\n\n") +
+      Pretty.log(s"val prime$n: Prime[_$n] =\n  ") +
       Pretty.block(
-        tNats(n) +
-          log("\n\n") +
-          types +
-          log("\n\n") +
-          Pretty.log(s"val prime$n: Prime[_$n] =\n  ") +
-          Pretty.block(
-            prime[Option](n) match {
-              case Some(p) =>
-                p.print
-              case None =>
-                Pretty.log(
-                  "??? // Try to build a value that pass the type checker using only the constructors."
-                )
-            }
-          ) +
-          Pretty.log(
-            s"""\n\ndef main(args: Array[String]): Unit =\n  println(s"$$prime$n")"""
-          )
+        prime[Option](n) match {
+          case Some(p) =>
+            p.print
+          case None =>
+            Pretty.log(
+              "??? // Try to build a value that pass the type checker using only the constructors."
+            )
+        }
       ) +
-      Pretty.log("\n}")
+      Pretty.log(
+        s"""\n\n@main\ndef primalityProofOf$n: Unit =\n  println(s"$$prime$n")"""
+      )
 }

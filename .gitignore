@@ -4,3 +4,6 @@ target/
 .jvm/
 .js/
 .idea/
+.bsp/
+.metals/
+.vscode/

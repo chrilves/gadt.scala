@@ -60,13 +60,13 @@ object Term {
     val (tpe, p) =
       term match {
         case Leaf(t, l) =>
-          (t, log(l.print))
+          (t, log(l.print + "()"))
 
         case Node(t, l, c) =>
           (
             t,
             if (c.isEmpty)
-              log(l.print)
+              log(l.print + "()")
             else
               Pretty.block(
                 log(s"${l.print}(  /* ${t.print} */\n  ") +

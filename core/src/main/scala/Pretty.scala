@@ -57,8 +57,8 @@ object Pretty {
     val newCurrent: Int =
       "[\n]([^\n]*$)".r
         .findFirstMatchIn(output)
-        .map(_.group(1).size)
-        .getOrElse(pos.current + s.size)
+        .map(_.group(1).length)
+        .getOrElse(pos.current + s.length)
 
     State(pos.copy(current = newCurrent), output)
   }
